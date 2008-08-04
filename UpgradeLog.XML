@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type='text/xsl' href='_UpgradeReport_Files/UpgradeReport.xslt'?><UpgradeLog>
+<Properties><Property Name="Solution" Value="Test">
+</Property><Property Name="Solution File" Value="E:\WZ-WORKS\Zero_FINAL_VER\Test.sln">
+</Property><Property Name="User Options File" Value="E:\WZ-WORKS\Zero_FINAL_VER\Test.suo">
+</Property><Property Name="Date" Value="2008年7月24日">
+</Property><Property Name="Time" Value="14:03">
+</Property></Properties><Event ErrorLevel="0" Project="" Source="Test.sln" Description="File successfully backed up as E:\WZ-WORKS\Zero_FINAL_VER\Test.sln.old">
+</Event><Event ErrorLevel="0" Project="" Source="Test.suo" Description="File successfully backed up as E:\WZ-WORKS\Zero_FINAL_VER\Test.suo.old">
+</Event><Event ErrorLevel="0" Project="Test" Source="Test.vcproj" Description="Web deployment to the local IIS server is no longer supported. The Web Deployment build tool has been removed from your project settings.">
+</Event><Event ErrorLevel="1" Project="Test" Source="Test.vcproj" Description="This application has been updated to include settings related to the User Account Control (UAC) feature of Windows Vista. By default, when run on Windows Vista with UAC enabled, this application is marked to run with the same privileges as the process that launched it. This marking also disables the application from running with virtualization. You can change UAC related settings from the Property Pages of the project.">
+</Event><Event ErrorLevel="0" Project="Test" Source="Test.vcproj" Description="Project file successfully backed up as 'E:\WZ-WORKS\Zero_FINAL_VER\Test.vcproj.8.00.old'.">
+</Event><Event ErrorLevel="0" Project="Test" Source="Test.vcproj" Description="Project upgraded successfully.">
+</Event><Event ErrorLevel="3" Project="Test" Source="Test.vcproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="" Source="Test.sln" Description="Solution converted successfully">
+</Event><Event ErrorLevel="3" Project="" Source="Test.sln" Description="Converted">
+</Event></UpgradeLog>
