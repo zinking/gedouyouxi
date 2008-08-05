@@ -129,6 +129,7 @@ StudioModel::StudioModel()
 	m_pstudiohdr = NULL;
 	m_pmodel = NULL;
 	m_ptexturehdr = NULL;
+	
 	for ( int i = 0; i < 32; ++ i )
 		m_panimhdr[i] = NULL;
 	m_origin[0] = m_origin[1] = m_origin[2] = 0;
@@ -137,6 +138,11 @@ StudioModel::StudioModel()
 	m_frame = 0;
 	m_bodynum = 0;
 	m_skinnum = 0;
+
+	//回调函数的初始化
+	animationCall = NULL;
+	data = NULL;
+
 }
 
 

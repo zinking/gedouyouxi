@@ -264,7 +264,8 @@ Command* CommandLookUpTable::getNewCommand( CommandCategory cc ,Player* aPlayer 
 	}
 }
 
-
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 RunBackCommand::RunBackCommand( Player* aPlayer )
 {
@@ -281,6 +282,7 @@ void RunBackCommand::execute()
 	ActivePlayer->isForceAnimation = false;
 
 	ActivePlayer->currentCommand = this; 
+	ActivePlayer->setSpeedHor( Vector2D() );
 	//这里应该注意到有两个指针同时指向了一个堆上的位置，造成了后来潜在的堆腐烂
 	//Command* pCom = ActivePlayer->currentCommand;
 	//if ( pCom ) delete pCom;
@@ -310,6 +312,7 @@ void RunCommand::execute()
 	ActivePlayer->isForceAnimation = false;
 
 	ActivePlayer->currentCommand = this;
+	ActivePlayer->setSpeedHor( Vector2D() );
 
 	//Command* pCom = ActivePlayer->currentCommand;
 	//if ( pCom ) delete pCom;
@@ -323,7 +326,7 @@ void RunCommand::execute()
 }
 //////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////
+//////////////////////////此命令无效////////////////////////////////////////////////
 IDLECommand::IDLECommand( Player* aPlayer )
 {
 	this->ActivePlayer = aPlayer;
@@ -367,6 +370,7 @@ void MoveLeftCommand::execute()
 	ActivePlayer->isForceAnimation = false;
 
 	ActivePlayer->currentCommand = this;
+	ActivePlayer->setSpeedHor( Vector2D() );
 
 	//Command* pCom = ActivePlayer->currentCommand;
 	//if ( pCom ) delete pCom;
@@ -395,6 +399,7 @@ void MoveRightCommand::execute()
 	ActivePlayer->isForceAnimation = false;
 
 	ActivePlayer->currentCommand = this;
+	ActivePlayer->setSpeedHor( Vector2D() );
 
 	//Command* pCom = ActivePlayer->currentCommand;
 	//if ( pCom ) delete pCom;
@@ -424,6 +429,7 @@ void JumpCommand::execute()
 	ActivePlayer->isForceAnimation = false;
 
 	ActivePlayer->currentCommand = this;
+	ActivePlayer->setSpeedHor( Vector2D() );
 
 	//Command* pCom = ActivePlayer->currentCommand;
 	//if ( pCom ) delete pCom;
@@ -451,6 +457,7 @@ void WeakFightCommand::execute()
 	ActivePlayer->isForceAnimation = true;
 
 	ActivePlayer->currentCommand = this;
+	ActivePlayer->setSpeedHor( Vector2D() );
 
 	//Command* pCom = ActivePlayer->currentCommand;
 	//if ( pCom ) delete pCom;
@@ -487,6 +494,7 @@ void StrongFightCommand::execute()
 	ActivePlayer->isForceAnimation = true;
 
 	ActivePlayer->currentCommand = this;
+	ActivePlayer->setSpeedHor( Vector2D() );
 
 	//Command* pCom = ActivePlayer->currentCommand;
 	//if ( pCom ) delete pCom;
@@ -523,6 +531,7 @@ void QiGongCommand::execute()
 	ActivePlayer->isForceAnimation = true;
 
 	ActivePlayer->currentCommand = this;
+	ActivePlayer->setSpeedHor( Vector2D() );
 
 	//Command* pCom = ActivePlayer->currentCommand;
 	//if ( pCom ) delete pCom;
@@ -559,15 +568,16 @@ void WeakFootCommand::execute()
 	ActivePlayer->isForceAnimation = true;
 
 	ActivePlayer->currentCommand = this;
+	ActivePlayer->setSpeedHor( Vector2D() );
 
 	//Command* pCom = ActivePlayer->currentCommand;
 	//if ( pCom ) delete pCom;
 	//pCom = new WeakFootCommand( ActivePlayer );
 
-	if (!ActivePlayer->isForceAni())
-	{
-		ActivePlayer->setSpeedHor(Vector2D(0, 0));
-	}
+	//if (!ActivePlayer->isForceAni())
+	//{
+	//	ActivePlayer->setSpeedHor(Vector2D(0, 0));
+	//}
 
 	if ( TargetPlayer ) 
 	{
@@ -595,15 +605,16 @@ void StrongFootCommand::execute()
 	ActivePlayer->isForceAnimation = true;
 
 	ActivePlayer->currentCommand = this;
+	ActivePlayer->setSpeedHor( Vector2D() );
 
 	//Command* pCom = ActivePlayer->currentCommand;
 	//if ( pCom ) delete pCom;
 	//pCom = new StrongFootCommand( ActivePlayer );
 
-	if (!ActivePlayer->isForceAni())
-	{
-		ActivePlayer->setSpeedHor(Vector2D(0, 0));
-	}
+	//if (!ActivePlayer->isForceAni())
+	//{
+	//	ActivePlayer->setSpeedHor(Vector2D(0, 0));
+	//}
 
 	if ( TargetPlayer ) 
 	{

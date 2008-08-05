@@ -11,16 +11,20 @@
 #include <map>
 
 using namespace std;
+
 typedef CommandQ CommandQueue;
 
 class GameWorld
 {
-	vector<Player> players;//设计来是支持多玩家的
-	vector<RenderModel> models;//支持多渲染模型
-	map<Player*,int> IndexTable;
-
+	//游戏的玩家
+	vector<Player* > players;
+	//玩家对应的模型
+	vector<RenderModel* > models;
+	
+	//存放自身发起的命令信息
 	CommandQueue* MainCommandQueue;
-	CommandQueue* NetCommandQueue;//存放了客户端发来的跳，攻击，等命令
+	//存放了对方发来的 命令信息
+	CommandQueue* NetCommandQueue;
 
 	Server* server;
 	Client* client;
@@ -28,6 +32,8 @@ class GameWorld
 	FixedCamera cam;
 
 	bool ServerOrClient;
+
+	//控制队列同步的简单的同步锁
 	bool queue_pop_lock;
 	bool queue_front_lock;//为什么要有这两个锁
 
