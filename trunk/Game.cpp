@@ -11,8 +11,12 @@
 using namespace std;
 
 #pragma warning(disable:4832)
+//STANDALONE_WITHOUT_NETWORK 使用这个宏编译无网络的独立版本
+
+
 
 const int ANI_MSEL = 10;	//一帧动画的毫秒数
+float dt = (float) ANI_MSEL / 1000;
 
 LogicGame* game;
 GameWorld* world;
@@ -24,14 +28,6 @@ int ServerNumber;
 //Frames per second counter
 FPS_COUNTER fpsCounter;
 
-//针对动作的判断
-bool idle = true;
-bool run = false;
-bool runback = false;
-bool jump = false;
-bool attack = false;//我靠全部耦合起来了，ANIMATION放在全局了，这怎么做
-bool state_left = false;
-bool state_right = false;
 
 //计时针对动作
 int time_count = 0;
@@ -86,73 +82,63 @@ void reshape( int w, int h )
 void display()
 {
 	game->getRenderSys()->Draw();	
+	game->UpdateGame( dt );
 	showFPS();
 
 	glFlush();
 	glutSwapBuffers();
-
-}
-//------------------------------------------------------------
-
-void timer( int p )
-{
-	time_count++;
-	float dt = (float) ANI_MSEL / 1000;
-
-	game->UpdateGame( dt );
-
 	glutPostRedisplay();
-	glutTimerFunc( ANI_MSEL, timer, 0 );
+
 }
-//------------------------------------------------------------
+
+#ifndef STANDALONE_WITHOUT_NETWORK
+
+#define SERVER_PUSHSEND(x) world->getMainCommandQueue()->push(  GETCOM( x ,pServer)  );\
+	world->getServer()->write(  CONVERT( x) );
+#define CLIENT_PUSHSEND(x) world->getMainCommandQueue()->push(  GETCOM( x ,pClient)  );\
+	world->getClient()->write(  CONVERT( x) );
+
+#else
+#define SERVER_PUSHSEND(x)  world->getMainCommandQueue()->push(  GETCOM( x ,pServer)  );  
+#define CLIENT_PUSHSEND(x)  world->getMainCommandQueue()->push(  GETCOM( x ,pClient)  ); 
+
+#endif
+
+
 void keyboard( unsigned char key, int x, int y )
 {
-	//char* jump = "JUMP";
-	//char* exit_flag = "EXIT";
-//	if(!attack){
+
 		if(game->getWorld()->IsServer())
 		{
 			switch ( key )
 			{
 				case 27:
-					world->getServer()->write( CONVERT( 1000) );//
+					world->getServer()->write( CONVERT( 1000) );
 					exit(0);
 					break;
 				case 32:
 					cout << "jump" << endl;
-					//world->getMainCommandQueue()->push(jump);
-					world->getMainCommandQueue()->push(  GETCOM(JUMP,pServer)  );
-					world->getServer()->write(  CONVERT( JUMP) );
+					SERVER_PUSHSEND(JUMP);
 					break;
 				case 'a':
 					cout << "weakfight" << endl;
-					//world->getMainCommandQueue()->push("WEAKFIGHT");
-					world->getMainCommandQueue()->push( GETCOM( WEAKFIGHT,pServer ) );
-					world->getServer()->write( CONVERT( WEAKFIGHT) );
+					SERVER_PUSHSEND(WEAKFIGHT)
 					break;
 				case 's':
 					cout << "strongfight" << endl;
-					//world->getMainCommandQueue()->push("STRONGFIGHT");
-					world->getMainCommandQueue()->push(  GETCOM(  STRONGFIGHT,pServer ) );
-					world->getServer()->write( CONVERT( STRONGFIGHT ) );
+					SERVER_PUSHSEND(STRONGFIGHT)
 					break;
 				case 'd':
 					cout << "qigong" << endl;
-					//world->getMainCommandQueue()->push("QIGONG");
-					world->getMainCommandQueue()->push( GETCOM( QIGONG,pServer ) );
-					world->getServer()->write( CONVERT( QIGONG ) );
+					SERVER_PUSHSEND(QIGONG)
 					break;
 				case 'z':
 					cout << "weakfoot" << endl;
-					//world->getMainCommandQueue()->push("WEAKFOOT");
-					world->getMainCommandQueue()->push(  GETCOM(  WEAKFOOT,pServer ) );
-					world->getServer()->write( CONVERT( WEAKFOOT ) );
+					SERVER_PUSHSEND(WEAKFOOT)
 					break;
 				case 'x':
 					cout << "strongfoot" << endl;
-					//world->getMainCommandQueue()->push("STRONGFOOT");
-					world->getMainCommandQueue()->push(  GETCOM(  STRONGFOOT,pServer  ) );
-					world->getServer()->write(  CONVERT( STRONGFOOT ) );
+					SERVER_PUSHSEND(STRONGFOOT)
 					break;
 			}
 		}
@@ -165,39 +151,33 @@ void keyboard( unsigned char key, int x, int y )
 					exit(0);
 				case 32:
 					cout << "jump" << endl;
-					world->getMainCommandQueue()->push(  GETCOM(JUMP,pClient) );
-					world->getClient()->write(  CONVERT( JUMP) );
+					CLIENT_PUSHSEND(JUMP)
 					break;
 				case 'a':
 					cout << "weakfight" << endl;
-					world->getMainCommandQueue()->push( GETCOM(WEAKFIGHT,pClient) );
-					world->getClient()->write( CONVERT(  WEAKFIGHT )  );
+					CLIENT_PUSHSEND(WEAKFIGHT)
 					break;
 				case 's':
 					cout << "strongfight" << endl;
-					world->getMainCommandQueue()->push( GETCOM(STRONGFIGHT,pClient) );
-					world->getClient()->write( CONVERT( STRONGFIGHT) );
+					CLIENT_PUSHSEND(STRONGFIGHT)
 					break;
 				case 'd':
 					cout << "qigong" << endl;
-					world->getClient()->write( CONVERT( QIGONG )  );
-					world->getMainCommandQueue()->push( GETCOM( QIGONG,pClient ) );
+					CLIENT_PUSHSEND(QIGONG)
 					break;
 				case 'z':
 					cout << "weakfoot" << endl;
-					world->getMainCommandQueue()->push( GETCOM( WEAKFOOT,pClient) );
-					world->getClient()->write( CONVERT( WEAKFOOT) );
+					CLIENT_PUSHSEND(WEAKFOOT)
 					break;
 				case 'x':
 					cout << "strongfoot" << endl;
-					world->getClient()->write(  CONVERT( STRONGFOOT ) );
-					world->getMainCommandQueue()->push( GETCOM(STRONGFOOT,pClient) );
+					CLIENT_PUSHSEND(STRONGFOOT)
 					break;
 
 			}
 		}
-	//	attack = true;
-	//}
+
+		display();
 }
 //------------------------------------------------------------
 void keyboard2( int key, int x, int y )
@@ -214,27 +194,19 @@ void keyboard2( int key, int x, int y )
 			{
 				case GLUT_KEY_UP:
 					cout << "up" << endl;
-					run = true;	
-					world->getServer()->write(  CONVERT( RUN ) );
-					world->getMainCommandQueue()->push(  GETCOM(RUN,pServer) );
+					SERVER_PUSHSEND(RUN);
 					break;
 				case GLUT_KEY_DOWN:
 					cout << "down" << endl;
-					runback = true;
-					world->getMainCommandQueue()->push(  GETCOM( RUNBACK,pServer)  );
-					world->getServer()->write(  CONVERT( RUNBACK ) );
+					SERVER_PUSHSEND(RUNBACK);
 					break;
 				case GLUT_KEY_LEFT:
 					cout << "left" << endl;
-					state_left = true;
-					world->getServer()->write(  CONVERT( LEFT ) );
-					world->getMainCommandQueue()->push(  GETCOM(LEFT,pServer)  );
+					SERVER_PUSHSEND(LEFT);
 					break;
 				case GLUT_KEY_RIGHT:
 					cout << "right" << endl;
-					state_right = true;
-					world->getMainCommandQueue()->push(  GETCOM(RIGHT,pServer)  );
-					world->getServer()->write(  CONVERT( RIGHT ) );
+					SERVER_PUSHSEND(RIGHT);
 					break;
 			}
 		} 
@@ -244,37 +216,29 @@ void keyboard2( int key, int x, int y )
 			{
 				case GLUT_KEY_UP:
 					cout << "up" << endl;
-					run = true;	
-					world->getClient()->write(  CONVERT( RUN ) );
-					world->getMainCommandQueue()->push(  GETCOM(RUN,pClient)  );
+					CLIENT_PUSHSEND(JUMP);
 					break;
 				case GLUT_KEY_DOWN:
 					cout << "down" << endl;
-					runback = true;
-					world->getMainCommandQueue()->push(  GETCOM(RUNBACK,pClient)  );
-					world->getClient()->write(  CONVERT( RUNBACK ) );
+					CLIENT_PUSHSEND(JUMP);
 					break;
 				case GLUT_KEY_LEFT:
 					cout << "left" << endl;
-					state_left = true;
-					world->getClient()->write(  CONVERT( LEFT ) );
-					world->getMainCommandQueue()->push(  GETCOM(LEFT,pClient) );
+					CLIENT_PUSHSEND(JUMP);
 					break;
 				case GLUT_KEY_RIGHT:
 					cout << "right" << endl;
-					state_right = true;
-					world->getClient()->write(  CONVERT( RIGHT ) );
-					world->getMainCommandQueue()->push(  GETCOM( RIGHT,pClient)  );
+					CLIENT_PUSHSEND(JUMP);
 					break;
 			}
 		}
 
+		display();
 }
 
 //------------------------------------------------------------
 void keyboard1Up( unsigned char key, int x, int y )
 {
-	attack = false;
 }
 
 //------------------------------------------------------------
@@ -283,19 +247,15 @@ void keyboard2Up( int key, int x, int y )
 	switch ( key )
 	{
 		case GLUT_KEY_UP:
-			run = false;
 			cout << "up_up" << endl;
 			break;
 		case GLUT_KEY_DOWN:
-			runback = false;
 			cout << "down_up" << endl;
 			break;
 		case GLUT_KEY_LEFT:
-			state_left = false;
 			cout << "left_up" << endl;
 			break;
 		case GLUT_KEY_RIGHT:
-			state_right = false;
 			cout << "right_up" << endl;
 			break;
 	}
@@ -333,7 +293,7 @@ void ServerReceiveMessage(void *)
 void main( int argc, char** argv )
 {
 
-
+#ifndef STANDALONE_WITHOUT_NETWORK
 	cout << "0 for server and other for client: ";
 	cin >> ServerNumber;
 	if( ServerNumber == 0 )
@@ -347,6 +307,10 @@ void main( int argc, char** argv )
 		world = new GameWorld(false);
 		_beginthread(ClientReceiveMessage, 0, NULL);
 	}
+#else
+	world = new GameWorld(true);
+#endif
+
 
 	glutInit( &argc, argv );
 	glutInitWindowSize( RenderSystem::getWidth(), RenderSystem::getHeight() );
@@ -355,7 +319,7 @@ void main( int argc, char** argv )
 
 	glutReshapeFunc( reshape );
 	glutDisplayFunc( display );
-	glutTimerFunc( ANI_MSEL, timer, 0 );
+//	glutTimerFunc( ANI_MSEL, timer, 0 );
 	glutKeyboardFunc( keyboard );
 	glutKeyboardUpFunc(keyboard1Up);
 	glutSpecialFunc( keyboard2 );
@@ -363,15 +327,7 @@ void main( int argc, char** argv )
 
 	game = new LogicGame( world );
 
-	if ( !game->getPhySys()->LoadScene( "2.s" ) )
-		return;
-	if ( !game->getRenderSys()->LoadScene( "1.m" ) )
-		return;
-	game->getWorld()->setPlayerNum( 2 );
-	if ( !game->getWorld()->LoadModel( 0, "goku.mdl" ) )
-		return;
-	if ( !game->getWorld()->LoadModel( 1, "goku.mdl" ) )
-		return;
+
 
 	pServer = world->getPlayer(0);
 	pClient = world->getPlayer(1);

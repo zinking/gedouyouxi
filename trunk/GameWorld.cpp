@@ -1,22 +1,28 @@
 #include "GameWorld.h"
 
+
+// 默认构造函数，实际并未使用
+
 GameWorld::GameWorld()
 {
 	MainCommandQueue = new CommandQueue();
 	NetCommandQueue = new CommandQueue();
-//	DataPackQueue = new queue<DataPackage*>();//初始化三个队列（默认构造函数，估计是没用的）
+
 }
 
 GameWorld::GameWorld(bool server_or_client)
 {
 	MainCommandQueue = new CommandQueue();
-	  NetCommandQueue = new CommandQueue();
-//	DataPackQueue = new queue<DataPackage*>();
+	NetCommandQueue = new CommandQueue();
+
 	ServerOrClient = server_or_client;
+
+	//初始化队列管理锁
 	this->queue_front_lock = false;
-	this->queue_pop_lock = false;//置两个锁
+	this->queue_pop_lock = false;
 	
 	//判断客户端或服务器，然后初始化
+#ifndef STANDALONE_WITHOUT_NETWORK
 	if(server_or_client)
 	{
 		this->InitAsServer();
@@ -25,6 +31,7 @@ GameWorld::GameWorld(bool server_or_client)
 	{
 		this->InitAsClient();
 	}
+#endif
 
 }
 
@@ -32,9 +39,19 @@ GameWorld::~GameWorld()
 {
 	if ( MainCommandQueue ) delete MainCommandQueue;
 	if ( NetCommandQueue )   delete NetCommandQueue;
-//	if ( DataPackQueue ) delete DataPackQueue;
+
 	if ( server ) delete server;
 	if ( client ) delete client;
+
+	Player * p = NULL;
+	RenderModel* pRM= NULL;
+	for ( int i=0;i < players.size(); i++ )
+	{
+		p = players[i];
+		pRM = models[i];
+		if ( p ) delete p;
+		if ( pRM ) delete pRM;
+	}
 }
 
 int GameWorld::getPlayerNum()
@@ -42,32 +59,37 @@ int GameWorld::getPlayerNum()
 	return players.size();
 }
 
+//游戏世界中模型和Player的初始化
+//通过VECTOR 默认构造完成
 void GameWorld::setPlayerNum( int n )
 {
 	players.resize( n );
 	models.resize( n );
 
-	//for ( int i=0; i<n; i++ )
-	//{
-	//	IndexTable[&players[i]] = i;
-	//}
+	for ( int i=0;i<n;i++ )
+	{
+		players[i] = new Player();
+		models[i] = new RenderModel();
+	}
 }
 
 Player* GameWorld::getPlayer( int n )
 {
-	return &players[n];
+	return players[n];
 }
 
 RenderModel* GameWorld::getModel( int n )
 {
-	return &models[n];
+	return models[n];
 }
 
+
+//TODO:模型文件的加载，因为当文件不存在时候也没有给出提示信息
 bool GameWorld::LoadModel( int i, const char* filename )
 {
-	bool b = models[i].LoadModel( filename );
-	players[i].setStature( models[i].CalcStature() );
-	return b;//此处居然无出错处理
+	bool b = models[i]->LoadModel( filename );
+	players[i]->setStature( models[i]->CalcStature() );
+	return b;
 }
 
 FixedCamera* GameWorld::getCamera()
@@ -106,35 +128,9 @@ Client* GameWorld::getClient(void)
 	return this->client;
 }
 
-void GameWorld::InitAsServer(void)
-{
-	server = new Server(1001);
-
-//	char* tmp = new char[100];
-	
-//	cout << "Input the message :" << endl;
-
-}
-
-void GameWorld::InitAsClient(void)
-{
-	client = new Client("127.0.0.1", 1001);
-	//如果对网络有要求的话，这里可以继续做
-
-	//client = new Client("192.168.1.101", 1001);
-	//client = new Client("192.168.18.123", 1001);
-
-//	char* tmp = new char[100];
-
-//	cout << "Input the message :" << endl;
-
-}
-
-//queue<DataPackage*>* GameWorld::getDataPackageQueue(void)
-//{
-//	return this->DataPackQueue;
-//}
-
+//////////////////////////////////////////////////////////////////////////
+/////GameWorld中的锁设计来是处理潜在的同步互斥问题的
+//////////////////////////////////////////////////////////////////////////
 void GameWorld::lock_pop(void)
 {
 	this->queue_pop_lock = true;
@@ -164,3 +160,31 @@ bool GameWorld::getLock_front(void)
 {
 	return this->queue_front_lock;
 }
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////
+////初始化服务端和客户端
+//////////////////////////////////////////////////////////////////////////
+void GameWorld::InitAsServer(void)
+{
+	server = new Server(1001);
+	//如果对网络有要求的话，这里可以继续做
+
+}
+
+void GameWorld::InitAsClient(void)
+{
+	client = new Client("127.0.0.1", 1001);
+	//如果对网络有要求的话，这里可以继续做
+
+	//client = new Client("192.168.1.101", 1001);
+	//client = new Client("192.168.18.123", 1001);
+}
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+

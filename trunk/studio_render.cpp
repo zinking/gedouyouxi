@@ -305,6 +305,7 @@ void StudioModel::AdvanceFrame( float dt )
 
 	if (dt > 0.1)
 		dt = 0.1f;
+	//更新目前帧进展程度
 	m_frame += dt * pseqdesc->fps;
 
 	if (pseqdesc->numframes <= 1)
@@ -316,6 +317,13 @@ void StudioModel::AdvanceFrame( float dt )
 		// wrap
 		m_frame -= (int)(m_frame / (pseqdesc->numframes - 1)) * (pseqdesc->numframes - 1);
 	}
+
+	//角色动画完成之后的回调函数
+	if ( pseqdesc->numframes - m_frame < 2 )
+	{
+		if ( animationCall && data ) (*animationCall)( data );
+	}
+	
 }
 
 

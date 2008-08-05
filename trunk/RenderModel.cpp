@@ -98,3 +98,8 @@ void RenderModel::Draw()
 {
 	model.DrawModel();	//studiomodel
 }
+
+StudioModel* RenderModel::getStudioModel()
+{
+	return &model;
+}

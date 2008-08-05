@@ -18,4 +18,5 @@ public:
 	bool IsAniEnd();
 	void Update( float dt, float speed = 1.0f );
 	void Draw();
+	StudioModel* getStudioModel();
 };

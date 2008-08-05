@@ -22,11 +22,15 @@ typedef unsigned char byte;
 #include "mathlib.h"
 #include "studio.h"
 
+typedef void (*ANIMATION_END_CALLBACK)( void *data);
+
 
 class StudioModel
 {
 public:
 	StudioModel();
+	ANIMATION_END_CALLBACK animationCall;
+	void* data;
 
 	studiohdr_t				*getStudioHeader () const { return m_pstudiohdr; }
 	studiohdr_t				*getTextureHeader () const { return m_ptexturehdr; }
